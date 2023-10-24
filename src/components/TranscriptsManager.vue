@@ -27,16 +27,16 @@
         <q-list bordered class="rounded-borders">
             <div v-for="transcript in transcripts" :key="transcript.id">
             <q-item>
-                <q-item-section side style="width:fit-content" >
+                <q-item-section side style="width:50px" >
                     {{transcript.id}}
                 </q-item-section>
-                <q-item-section side style="width:fit-content" >
+                <q-item-section side style="width:100px" >
                     {{transcript.name}}
                 </q-item-section>
                 <q-item-section>
                     {{transcript.content}}
                 </q-item-section>
-                <q-item-section side style="width:fit-content" >
+                <q-item-section side style="width:300px" >
                     {{transcript.date}}
                 </q-item-section>
                 <q-item-section side style="width:fit-content" >
@@ -47,7 +47,6 @@
                     </q-btn>
                     <q-dialog v-model="editDialog" persistent 
                         @before-show="contentEdit=transcript.content; nameEdit=transcript.name"
-                        @hide="console.log(transcript.content); console.log(transcript.name)"
                     >
                         <q-card style="min-width: 350px">
                         <q-card-section class="q-pt-none">
@@ -82,10 +81,6 @@ import { defineComponent, ref } from "vue";
 import axios from "axios";
 import { onMounted } from 'vue';
 
-onMounted(() => {
-    this.fetchData()
-})
-
 export default defineComponent({
 name: "TranscriptsManager",
 
@@ -110,6 +105,7 @@ methods: {
         axios.request(config)
         .then((response) => {
             console.log(JSON.stringify(response.data));
+            this.fetchData()
         })
         .catch((error) => {
             console.log(error);
@@ -134,6 +130,7 @@ methods: {
         axios.request(config)
         .then((response) => {
             console.log(JSON.stringify(response.data));
+            this.fetchData()
         })
         .catch((error) => {
             console.log(error);
@@ -162,6 +159,7 @@ methods: {
             axios.request(config)
             .then((response) => {
                 console.log(JSON.stringify(response.data));
+                this.fetchData()
             })
             .catch((error) => {
                 console.log(error);
@@ -187,7 +185,9 @@ methods: {
 
     }
 },
-
+beforeMount() {
+   this.fetchData()
+},
 data() {
     return {
         file: null,
