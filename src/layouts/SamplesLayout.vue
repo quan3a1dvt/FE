@@ -5,7 +5,7 @@
             class="window-height window-width row justify-center items-center"
             style="background-color: #009688"
       >
-        <q-card  style="width:1000px">
+        <q-card  style="width:1100px">
           <q-tabs
             v-model="tab"
             dense
