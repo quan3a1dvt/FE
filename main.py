@@ -139,7 +139,7 @@ async def login(username: str = Form(...), password: str = Form(...)):
 
 
 @app.post("/addtranscript/")
-async def add_sample(name: str = Form(...), content: str = Form(...)):
+async def add_transcript(name: str = Form(...), content: str = Form(...)):
     cursor = conn.cursor() 
     query = "INSERT INTO transcript (name, content) VALUES (%s, %s)"
     cursor.execute(query, (name, content))
@@ -150,6 +150,8 @@ async def add_sample(name: str = Form(...), content: str = Form(...)):
 @app.post("/deletetranscript/")
 async def delete_sample(id: int = Form(...)):
     cursor = conn.cursor()
+    query = "DELETE FROM sample WHERE transcriptId = %s"
+    cursor.execute(query, (id,))
     query = "DELETE FROM transcript WHERE id = %s"
     cursor.execute(query, (id,))
     conn.commit()
@@ -204,14 +206,14 @@ def fetch_transcripts(start_idx: int, count: int):
 
 
 @app.post("/addaudio/")
-async def add_sample(name: str = Form(...), audio: UploadFile = File(...)):
+async def add_audio(name: str = Form(...), audio: UploadFile = File(...)):
     file_path = os.path.join(parent_folder, 'Audios', audio.filename)
     with open(file_path, "wb") as file_object:
         shutil.copyfileobj(audio.file, file_object)
     filename, extension = os.path.splitext(audio.filename)
     cursor = conn.cursor() 
     query = "INSERT INTO audio (name, path) VALUES (%s, %s)"
-    cursor.execute(query, (filename, "Audios/{}".format(audio.filename)))
+    cursor.execute(query, (name, "Audios/{}".format(audio.filename)))
     conn.commit()
     cursor.close()
     return JSONResponse(content={"message": "Add audio successfully"})
@@ -219,6 +221,8 @@ async def add_sample(name: str = Form(...), audio: UploadFile = File(...)):
 @app.post("/deleteaudio/")
 async def delete_sample(id: int = Form(...)):
     cursor = conn.cursor()
+    query = "DELETE FROM sample WHERE audioId = %s"
+    cursor.execute(query, (id,))
     query = "DELETE FROM audio WHERE id = %s"
     cursor.execute(query, (id,))
     conn.commit()
@@ -226,10 +230,10 @@ async def delete_sample(id: int = Form(...)):
     return JSONResponse(content={"message": "Delete audio successfully"})
 
 @app.post("/editaudio/")
-async def edit_audio(id: int = Form(...), content: str = Form(...)):
+async def edit_audio(id: int = Form(...), name: str = Form(...)):
     cursor = conn.cursor()
-    query = "UPDATE audio SET content = %s WHERE id = %s"
-    cursor.execute(query, (content,id))
+    query = "UPDATE audio SET name = %s WHERE id = %s"
+    cursor.execute(query, (name,id))
     conn.commit()
     cursor.close()    
     return JSONResponse(content={"message": "Update audio successfully"})  
@@ -252,7 +256,6 @@ def fetch_audios(start_idx: int, count: int):
         audio = {
             "id": result[0],
             "name": result[1],
-            "content": result[2],
             "update": result[3],
             "date": result[4]
         }
@@ -269,18 +272,19 @@ def fetch_audios(start_idx: int, count: int):
 
 
 @app.post("/addsample/")
-async def add_sample(audio: UploadFile = File(...), content: str = Form(...)):
+async def add_sample(content: str = Form(...), audio: UploadFile = File(...)):
     file_path = os.path.join(parent_folder, 'Audios', audio.filename)
     with open(file_path, "wb") as file_object:
         shutil.copyfileobj(audio.file, file_object)
+    filename, extension = os.path.splitext(audio.filename)
     cursor = conn.cursor() 
-    query = "INSERT INTO transcript (content) VALUES (%s)"
-    cursor.execute(query, (content,))
+    query = "INSERT INTO transcript (content, name) VALUES (%s, %s)"
+    cursor.execute(query, (content,filename))
     cursor.execute("SELECT LAST_INSERT_ID()")
     last_insert_id_transcript = cursor.fetchone()
 
     query = "INSERT INTO audio (name, path) VALUES (%s, %s)"
-    cursor.execute(query, (audio.filename, "Audios/{}".format(audio.filename)))
+    cursor.execute(query, (filename, "Audios/{}".format(audio.filename)))
     cursor.execute("SELECT LAST_INSERT_ID()")
     last_insert_id_audio = cursor.fetchone()
 
@@ -355,7 +359,7 @@ def fetch_samples(start_idx: int, count: int):
         query = "SELECT * FROM transcript WHERE id = %s"
         cursor.execute(query, (sample["transcriptId"],))
         result = cursor.fetchone()
-        content = result[1]
+        content = result[2]
 
         sample["content"] = content
         samples.append(sample)
