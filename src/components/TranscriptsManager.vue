@@ -111,37 +111,14 @@
               style="width: fit-content"
               label="Edit"
               color="blue"
-              @click="editDialog = true"
-            >
-            </q-btn>
-            <q-dialog
-              v-model="editDialog"
-              persistent
-              @before-show="
+              @click="
+                transcriptEdit = transcript;
                 contentEdit = transcript.content;
                 nameEdit = transcript.name;
+                editDialog = true;
               "
             >
-              <q-card style="min-width: 350px">
-                <q-card-section class="q-pt-none">
-                  <q-input type="text" dense v-model="nameEdit" autofocus />
-                </q-card-section>
-                <q-card-section class="q-pt-none">
-                  <q-input type="textarea" dense v-model="contentEdit" autofocus />
-                </q-card-section>
-                <q-card-actions align="right" class="text-primary">
-                  <q-btn label="Cancel" v-close-popup />
-                  <q-btn
-                    label="Accept"
-                    color="green"
-                    v-close-popup
-                    @click="
-                      editTranscript(transcript.id, transcript.content, transcript.name)
-                    "
-                  />
-                </q-card-actions>
-              </q-card>
-            </q-dialog>
+            </q-btn>
           </q-item-section>
           <q-item-section side class="">
             <q-btn
@@ -156,6 +133,31 @@
         <q-separator spaced />
       </div>
     </q-list>
+    <q-dialog v-model="editDialog" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section class="q-pt-none">
+          <q-input type="text" dense v-model="nameEdit" autofocus />
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-input type="textarea" dense v-model="contentEdit" autofocus />
+        </q-card-section>
+        <q-card-actions align="right" class="text-primary">
+          <q-btn label="Cancel" v-close-popup />
+          <q-btn
+            label="Accept"
+            color="green"
+            v-close-popup
+            @click="
+              editTranscript(
+                transcriptEdit.id,
+                transcriptEdit.content,
+                transcriptEdit.name
+              )
+            "
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -282,10 +284,11 @@ export default defineComponent({
       contentAdd: "",
       nameEdit: "",
       contentEdit: "",
+      transcriptEdit: null,
       transcripts: [],
       currentPage: 1,
       itemPerPage: 5,
-      ip: "https://1229-14-231-130-155.ngrok-free.app",
+      ip: "http://localhost:80",
       tab: "transcript",
     };
   },

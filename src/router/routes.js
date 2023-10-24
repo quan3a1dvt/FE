@@ -1,15 +1,15 @@
 import LoginLayout from "../layouts/LoginLayout.vue"
-import SamplesLayout from "../layouts/SamplesLayout.vue"
+import AdminLayout from "../layouts/AdminLayout.vue"
 const routes = [
-  {
-    path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
+  // {
+  //   path: '/',
+  //   component: () => import('layouts/MainLayout.vue'),
+  //   children: [
       
-      { path: '', component: () => import('pages/IndexPage.vue') }
+  //     { path: '', component: () => import('pages/IndexPage.vue') }
       
-    ]
-  },
+  //   ]
+  // },
   {
     path: '/login',
     name: 'LoginLayout',
@@ -17,10 +17,10 @@ const routes = [
     component: LoginLayout
   },
   {
-    path: '/sample',
-    name: 'SamplesLayout',
+    path: '/',
+    name: 'AdminLayout',
     props: true,
-    component: SamplesLayout
+    component: AdminLayout
   },
   // Always leave this as last one,
   // but you can also remove it
