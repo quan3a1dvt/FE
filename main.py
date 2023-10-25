@@ -238,7 +238,7 @@ def edit_audio(id: int = Form(...), name: str = Form(...), audio: UploadFile = F
     filename, extension = os.path.splitext(audio.filename)
     cursor = conn.cursor() 
     query = "UPDATE audio SET name = %s, path = %s, lastupdate = CURRENT_TIMESTAMP WHERE id = %s"
-    cursor.execute(query, (name,id, "Audios/{}".format(audio.filename)))
+    cursor.execute(query, (name, "Audios/{}".format(audio.filename), id))
     conn.commit()
     cursor.close()    
     return JSONResponse(content={"message": "Update audio successfully"})  
@@ -276,25 +276,58 @@ def fetch_audios(start_idx: int, count: int):
 
 
 
-@app.post("/addsample/")
-async def add_sample(content: str = Form(...), audio: UploadFile = File(...)):
-    file_path = os.path.join(parent_folder, 'Audios', audio.filename)
-    with open(file_path, "wb") as file_object:
-        shutil.copyfileobj(audio.file, file_object)
-    filename, extension = os.path.splitext(audio.filename)
-    cursor = conn.cursor() 
-    query = "INSERT INTO transcript (content, name) VALUES (%s, %s)"
-    cursor.execute(query, (content,filename))
-    cursor.execute("SELECT LAST_INSERT_ID()")
-    last_insert_id_transcript = cursor.fetchone()
 
-    query = "INSERT INTO audio (name, path) VALUES (%s, %s)"
-    cursor.execute(query, (filename, "Audios/{}".format(audio.filename)))
-    cursor.execute("SELECT LAST_INSERT_ID()")
-    last_insert_id_audio = cursor.fetchone()
+
+
+
+
+
+
+@app.get("/transcript-by-name/")
+def get_transcript_by_name(name: str):
+    cursor = conn.cursor()
+    query = "SELECT * FROM transcript WHERE name = %s"
+    cursor.execute(query, (name,))
+    result = cursor.fetchone()
+    conn.commit()
+    cursor.close() 
+    if result is not None:
+        return {
+            "id": result[0],
+            "name": result[1],
+            "content": result[2],
+            "lastupdate": result[3],
+            "date": result[4]
+        }
+    else:
+        raise HTTPException(status_code=404, detail="Transcript name not found")
+
+@app.get("/audio-by-name/")
+def get_audio_by_name(name: str):
+    cursor = conn.cursor()
+    query = "SELECT * FROM audio WHERE name = %s"
+    cursor.execute(query, (name,))
+    result = cursor.fetchone()
+    conn.commit()
+    cursor.close() 
+    if result is not None:
+        return {
+            "id": result[0],
+            "name": result[1],
+            "path": result[2],
+            "lastupdate": result[3],
+            "date": result[4]
+        }
+    else:
+        raise HTTPException(status_code=404, detail="Audio name not found")
+
+
+@app.post("/addsample/")
+async def add_sample(audioId: int = Form(...), transcriptId: int = Form(...)):
+    cursor = conn.cursor() 
 
     query = "INSERT INTO sample (audioId, transcriptId) VALUES (%s, %s)"
-    cursor.execute(query, (last_insert_id_audio, last_insert_id_transcript))
+    cursor.execute(query, (audioId, transcriptId))
 
     conn.commit()
     cursor.close()
@@ -367,6 +400,12 @@ def fetch_samples(start_idx: int, count: int):
         content = result[2]
 
         sample["content"] = content
+        sample["transcriptName"] = result[1]
+
+        query = "SELECT * FROM audio WHERE id = %s"
+        cursor.execute(query, (sample["audioId"],))
+        result = cursor.fetchone()
+        sample["audioName"] = result[1]
         samples.append(sample)
 
     conn.commit()
@@ -385,6 +424,18 @@ def download_audio(id: int):
     audio_path = audio[2]
 
     return FileResponse(os.path.join(parent_folder, audio_path), media_type="audio/wav", headers={"Content-Disposition": "attachment; filename={}".format(audio[1])})
+
+
+
+@app.post("/editsample/")
+def edit_audio(id: int = Form(...), audioId: int = Form(...), transcriptId: int = Form(...)):
+    cursor = conn.cursor() 
+    query = "UPDATE sample SET audioId = %s, transcriptId = %s WHERE id = %s"
+    cursor.execute(query, (audioId, transcriptId, id))
+    conn.commit()
+    cursor.close()    
+    return JSONResponse(content={"message": "Update audio successfully"})  
+
 
 
 @app.get("/audiogen/") 

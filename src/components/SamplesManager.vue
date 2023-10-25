@@ -11,20 +11,48 @@
     <q-dialog v-model="addDialog" @before-show="file = null">
       <q-card style="min-width: 350px">
         <q-card-section class="q-pt-none">
-          <q-input label="Enter name" type="text" dense v-model="nameAdd" />
+          <div class="flex q-pt-md">
+            <q-input
+              style="width: 240px"
+              label="Enter transcript name"
+              type="text"
+              dense
+              v-model="transcriptNameAdd"
+            />
+            <q-space />
+            <q-btn
+              label="Find"
+              color="teal"
+              @click="getTranscriptByName(transcriptNameEdit)"
+            >
+            </q-btn>
+          </div>
+          <div v-if="searchTranscript != null" class="q-pt-sm">
+            {{ searchTranscript.content }}
+          </div>
         </q-card-section>
-        <q-card-section>
-          <q-file
-            style="max-width: 300px"
-            v-model="file"
-            filled
-            label="Select audio file"
-            accept=".wav, .mp3"
-          />
+        <q-card-section class="q-pt-none">
+          <div class="flex q-pt-md">
+            <q-input
+              style="width: 240px"
+              label="Enter audio name"
+              type="text"
+              dense
+              v-model="audioNameAdd"
+            />
+            <q-space />
+            <q-btn label="Find" color="teal" @click="getAudioByName(audioNameEdit)">
+            </q-btn>
+          </div>
+          <div v-if="searchAudio != null" class="q-pt-sm">
+            <audio controls>
+              <source :src="`${ip}/audio/${searchAudio.id}`" type="audio/wav" />
+            </audio>
+          </div>
         </q-card-section>
         <q-card-actions align="right" class="text-primary">
           <q-btn label="Cancel" v-close-popup />
-          <q-btn label="Add Audio" color="teal" v-close-popup @click="addAudio" />
+          <q-btn label="Add Sample" color="teal" v-close-popup @click="addSample" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -36,11 +64,11 @@
           STT
         </q-item-section>
         <q-separator vertical />
-        <q-item-section side style="width: 100px; align-items: center" class="text-black">
+        <q-item-section style="width: 100%; align-items: center" class="text-black">
           Content
         </q-item-section>
         <q-separator vertical />
-        <q-item-section style="width: 100%; align-items: center" class="">
+        <q-item-section side style="width: 320px; align-items: center" class="">
           Audio
         </q-item-section>
         <q-separator vertical />
@@ -71,15 +99,11 @@
             {{ index }}
           </q-item-section>
           <q-separator vertical />
-          <q-item-section
-            side
-            style="width: 100px; align-items: center"
-            class="text-black"
-          >
+          <q-item-section style="width: 100%; align-items: center" class="text-black">
             {{ sample.content }}
           </q-item-section>
           <q-separator vertical />
-          <q-item-section style="width: 100%" class="">
+          <q-item-section side style="width: 320px" class="">
             <div class="q-pl-sm q-pt-sm">
               <audio controls>
                 <source :src="`${ip}/audio/${sample.audioId}`" type="audio/wav" />
@@ -94,8 +118,7 @@
               label="Edit"
               color="blue"
               @click="
-                audioEdit = audio;
-                nameEdit = audio.name;
+                sampleEdit = sample;
                 editDialog = true;
               "
             >
@@ -107,7 +130,7 @@
               style="width: fit-content"
               label="Delete"
               color="red"
-              @click="deleteAudio(audio.id)"
+              @click="deleteSample(sample.id)"
             ></q-btn>
           </q-item-section>
         </q-item>
@@ -115,19 +138,55 @@
         <q-separator spaced />
       </div>
     </q-list>
-    <q-dialog v-model="editDialog" @before-show="fileEdit = null">
+    <q-dialog
+      v-model="editDialog"
+      @before-show="
+        searchTranscript = null;
+        searchAudio = null;
+        transcriptNameEdit = sampleEdit.transcriptName;
+        audioNameEdit = sampleEdit.audioName;
+      "
+    >
       <q-card style="min-width: 350px">
         <q-card-section class="q-pt-none">
-          <q-input type="text" dense v-model="nameEdit" autofocus />
+          <div class="flex q-pt-md">
+            <q-input
+              style="width: 240px"
+              label="Enter transcript name"
+              type="text"
+              dense
+              v-model="transcriptNameEdit"
+            />
+            <q-space />
+            <q-btn
+              label="Find"
+              color="teal"
+              @click="getTranscriptByName(transcriptNameEdit)"
+            >
+            </q-btn>
+          </div>
+          <div v-if="searchTranscript != null" class="q-pt-sm">
+            {{ searchTranscript.content }}
+          </div>
         </q-card-section>
-        <q-card-section>
-          <q-file
-            style="max-width: 300px"
-            v-model="fileEdit"
-            filled
-            label="Select audio file"
-            accept=".wav, .mp3"
-          />
+        <q-card-section class="q-pt-none">
+          <div class="flex q-pt-md">
+            <q-input
+              style="width: 240px"
+              label="Enter audio name"
+              type="text"
+              dense
+              v-model="audioNameEdit"
+            />
+            <q-space />
+            <q-btn label="Find" color="teal" @click="getAudioByName(audioNameEdit)">
+            </q-btn>
+          </div>
+          <div v-if="searchAudio != null" class="q-pt-sm">
+            <audio controls>
+              <source :src="`${ip}/audio/${searchAudio.id}`" type="audio/wav" />
+            </audio>
+          </div>
         </q-card-section>
         <q-card-actions align="right" class="text-primary">
           <q-btn label="Cancel" v-close-popup />
@@ -135,7 +194,7 @@
             label="Accept"
             color="teal"
             v-close-popup
-            @click="editAudio(audioEdit.id, audioEdit.name)"
+            @click="editSample(sampleEdit.id, searchAudio.id, searchTranscript.id)"
           />
         </q-card-actions>
       </q-card>
@@ -149,18 +208,51 @@ import axios from "axios";
 import { onMounted } from "vue";
 
 export default defineComponent({
-  name: "AudiosManager",
-
+  name: "SamplesManager",
   components: {},
   methods: {
-    async addAudio() {
+    getTranscriptByName(name) {
+      let config = {
+        method: "get",
+        maxBodyLength: Infinity,
+        url: `${this.ip}/transcript-by-name?name=${name}`,
+        headers: {},
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          this.searchTranscript = response.data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    getAudioByName(name) {
+      let config = {
+        method: "get",
+        maxBodyLength: Infinity,
+        url: `${this.ip}/audio-by-name?name=${name}`,
+        headers: {},
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          this.searchAudio = response.data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    async addSample() {
       let data = new FormData();
-      data.append("name", this.nameAdd);
-      data.append("audio", this.file);
+      data.append("audioId", this.searchAudio.id);
+      data.append("transcriptId", this.searchTranscript.id);
       let config = {
         method: "post",
         maxBodyLength: Infinity,
-        url: `${this.ip}/addaudio`,
+        url: `${this.ip}/addsample`,
         headers: {
           ...(data.getHeaders
             ? data.getHeaders()
@@ -172,20 +264,46 @@ export default defineComponent({
       axios
         .request(config)
         .then((response) => {
-          console.log(JSON.stringify(response.data));
           this.fetchData();
         })
         .catch((error) => {
           console.log(error);
         });
     },
-    deleteAudio(id) {
+    deleteSample(id) {
       let data = new FormData();
       data.append("id", id);
       let config = {
         method: "post",
         maxBodyLength: Infinity,
-        url: `${this.ip}/deleteaudio`,
+        url: `${this.ip}/deletesample`,
+        headers: {
+          ...(data.getHeaders
+            ? data.getHeaders()
+            : { "Content-Type": "multipart/form-data" }),
+        },
+        data: data,
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          this.fetchData();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+
+    editSample(id, audioId, transcriptId) {
+      let data = new FormData();
+      data.append("id", id);
+      data.append("audioId", audioId);
+      data.append("transcriptId", transcriptId);
+      let config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: `${this.ip}/editsample`,
         headers: {
           ...(data.getHeaders
             ? data.getHeaders()
@@ -205,35 +323,6 @@ export default defineComponent({
         });
     },
 
-    editAudio(id, name) {
-      if (this.nameEdit != name || this.fileEdit != null) {
-        let data = new FormData();
-        data.append("id", id);
-        data.append("name", this.nameEdit);
-        data.append("audio", this.fileEdit);
-        let config = {
-          method: "post",
-          maxBodyLength: Infinity,
-          url: `${this.ip}/editaudio`,
-          headers: {
-            ...(data.getHeaders
-              ? data.getHeaders()
-              : { "Content-Type": "multipart/form-data" }),
-          },
-          data: data,
-        };
-
-        axios
-          .request(config)
-          .then((response) => {
-            console.log(JSON.stringify(response.data));
-            this.fetchData();
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-    },
     fetchData() {
       let config = {
         method: "get",
@@ -263,9 +352,14 @@ export default defineComponent({
       fileEdit: null,
       addDialog: false,
       editDialog: false,
-      nameAdd: "",
-      nameEdit: "",
-      audioEdit: null,
+      sampleEdit: "",
+
+      transcriptNameAdd: "",
+      audioNameAdd: "",
+      transcriptNameEdit: "",
+      audioNameEdit: "",
+      searchTranscript: null,
+      searchAudio: null,
       samples: [],
       currentPage: 1,
       itemPerPage: 5,
