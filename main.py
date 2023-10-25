@@ -30,12 +30,12 @@ from HifiGan.models import Generator
 # import nltk
 # nltk.download('punkt')
 device = None
-parent_folder = Path(r'C:\\Users\\dangv\\Documents\\BTL\\HTTM\BE_FastAPI')
+parent_folder = Path('/Users/quandang/Documents/BTL/HTTM/BE_FastAPI')
 
     
 #HifiGan
 hifi_folder = os.path.join(parent_folder, 'HifiGan')
-checkpoint_file_path = os.path.join(hifi_folder, 'model\generator_v1')
+checkpoint_file_path = os.path.join(hifi_folder, 'model','generator_v1')
 h = None
 def load_checkpoint(filepath, device):
     assert os.path.isfile(filepath)
@@ -66,7 +66,7 @@ generator.remove_weight_norm()
 #Tacotron2
 tacotron_folder = os.path.join(parent_folder, 'Tacotron2Pytorch')
 def load_model(ckpt_pth):
-    ckpt_dict = torch.load(ckpt_pth)
+    ckpt_dict = torch.load(ckpt_pth, map_location=torch.device('cpu') )
     model = Tacotron2()
     model.load_state_dict(ckpt_dict['model'])
     model = mode(model, True).eval()
@@ -84,7 +84,7 @@ def infer(text, model):
     mel_outputs, mel_outputs_postnet, _, alignments = model.inference(sequences)
     return (mel_outputs, mel_outputs_postnet, alignments)
     
-model = load_model(os.path.join(tacotron_folder, 'models\ckpt_200000'))
+model = load_model(os.path.join(tacotron_folder, 'models','ckpt_200000'))
 
 
 # Database configuration
@@ -161,7 +161,7 @@ async def delete_sample(id: int = Form(...)):
 @app.post("/edittranscript/")
 async def edit_transcript(id: int = Form(...), name: str = Form(...), content: str = Form(...)):
     cursor = conn.cursor()
-    query = "UPDATE transcript SET content = %s, name = %s WHERE id = %s"
+    query = "UPDATE transcript SET content = %s, name = %s, lastupdate = CURRENT_TIMESTAMP WHERE id = %s"
     cursor.execute(query, (content, name, id))
     conn.commit()
     cursor.close()    
@@ -230,10 +230,15 @@ async def delete_sample(id: int = Form(...)):
     return JSONResponse(content={"message": "Delete audio successfully"})
 
 @app.post("/editaudio/")
-async def edit_audio(id: int = Form(...), name: str = Form(...)):
-    cursor = conn.cursor()
-    query = "UPDATE audio SET name = %s WHERE id = %s"
-    cursor.execute(query, (name,id))
+def edit_audio(id: int = Form(...), name: str = Form(...), audio: UploadFile = File(...)):
+   
+    file_path = os.path.join(parent_folder, 'Audios', audio.filename)
+    with open(file_path, "wb") as file_object:
+        shutil.copyfileobj(audio.file, file_object)
+    filename, extension = os.path.splitext(audio.filename)
+    cursor = conn.cursor() 
+    query = "UPDATE audio SET name = %s, path = %s, lastupdate = CURRENT_TIMESTAMP WHERE id = %s"
+    cursor.execute(query, (name,id, "Audios/{}".format(audio.filename)))
     conn.commit()
     cursor.close()    
     return JSONResponse(content={"message": "Update audio successfully"})  

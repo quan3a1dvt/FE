@@ -8,10 +8,10 @@
     />
     <q-space></q-space>
     <q-btn label="Add" color="teal" @click="addDialog = true"></q-btn>
-    <q-dialog v-model="addDialog" persistent>
+    <q-dialog v-model="addDialog" @before-show="file = null">
       <q-card style="min-width: 350px">
         <q-card-section class="q-pt-none">
-          <q-input type="textarea" dense v-model="contentAdd" />
+          <q-input label="Enter name" type="text" dense v-model="nameAdd" />
         </q-card-section>
         <q-card-section>
           <q-file
@@ -24,65 +24,77 @@
         </q-card-section>
         <q-card-actions align="right" class="text-primary">
           <q-btn label="Cancel" v-close-popup />
-          <q-btn label="Add Sample" v-close-popup @click="addSample" />
+          <q-btn label="Add Audio" color="teal" v-close-popup @click="addAudio" />
         </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
   <div>
     <q-list bordered class="rounded-borders">
-      <q-item>
-        <q-item-section
-          side
-          style="width: 50px; align-items: center"
-          class="text-black rm-pad"
-        >
+      <q-item class="q-pa-none q-pr-sm">
+        <q-item-section side style="width: 50px; align-items: center" class="text-black">
           STT
         </q-item-section>
         <q-separator vertical />
-        <q-item-section style="width: 100%; align-items: center" class="rm-pad">
+        <q-item-section side style="width: 100px; align-items: center" class="text-black">
           Content
         </q-item-section>
         <q-separator vertical />
-        <q-item-section side style="width: 350px; align-items: center" class="rm-pad">
+        <q-item-section style="width: 100%; align-items: center" class="">
           Audio
         </q-item-section>
         <q-separator vertical />
         <q-item-section side>
-          <q-btn style="visibility: hidden; width: fit-content" label="Edit"> </q-btn>
+          <q-btn
+            class="q-ml-sm"
+            style="visibility: hidden; width: fit-content"
+            label="Edit"
+          >
+          </q-btn>
         </q-item-section>
         <q-item-section side>
-          <q-btn style="visibility: hidden; width: fit-content" label="Delete"></q-btn>
+          <q-btn
+            class="q-ml-sm"
+            style="visibility: hidden; width: fit-content"
+            label="Delete"
+          ></q-btn>
         </q-item-section>
       </q-item>
       <q-separator />
       <div v-for="(sample, index) in samples" :key="sample.id">
-        <q-item>
+        <q-item class="q-pa-none q-pr-sm">
           <q-item-section
             side
             style="width: 50px; align-items: center"
-            class="text-black rm-pad"
+            class="text-black"
           >
             {{ index }}
           </q-item-section>
           <q-separator vertical />
-          <q-item-section style="width: 100%" class="text-black rm-pad">
+          <q-item-section
+            side
+            style="width: 100px; align-items: center"
+            class="text-black"
+          >
             {{ sample.content }}
           </q-item-section>
           <q-separator vertical />
-          <q-item-section side style="width: 350px" class="rm-pad">
-            <audio controls>
-              <source :src="`${ip}/audio/${sample.audioId}`" type="audio/wav" />
-            </audio>
+          <q-item-section style="width: 100%" class="">
+            <div class="q-pl-sm q-pt-sm">
+              <audio controls>
+                <source :src="`${ip}/audio/${sample.audioId}`" type="audio/wav" />
+              </audio>
+            </div>
           </q-item-section>
+          <q-separator vertical />
           <q-item-section side>
             <q-btn
+              class="q-ml-sm"
               style="width: fit-content"
               label="Edit"
               color="blue"
               @click="
                 audioEdit = audio;
-                contentEdit = audio.content;
                 nameEdit = audio.name;
                 editDialog = true;
               "
@@ -91,10 +103,11 @@
           </q-item-section>
           <q-item-section side class="">
             <q-btn
+              class="q-ml-sm"
               style="width: fit-content"
               label="Delete"
               color="red"
-              @click="deleteSample(sample.id)"
+              @click="deleteAudio(audio.id)"
             ></q-btn>
           </q-item-section>
         </q-item>
@@ -102,18 +115,27 @@
         <q-separator spaced />
       </div>
     </q-list>
-    <q-dialog v-model="editDialog" persistent>
+    <q-dialog v-model="editDialog" @before-show="fileEdit = null">
       <q-card style="min-width: 350px">
         <q-card-section class="q-pt-none">
           <q-input type="text" dense v-model="nameEdit" autofocus />
+        </q-card-section>
+        <q-card-section>
+          <q-file
+            style="max-width: 300px"
+            v-model="fileEdit"
+            filled
+            label="Select audio file"
+            accept=".wav, .mp3"
+          />
         </q-card-section>
         <q-card-actions align="right" class="text-primary">
           <q-btn label="Cancel" v-close-popup />
           <q-btn
             label="Accept"
-            color="green"
+            color="teal"
             v-close-popup
-            @click="editSample(audioEdit.id, audioEdit.name)"
+            @click="editAudio(audioEdit.id, audioEdit.name)"
           />
         </q-card-actions>
       </q-card>
@@ -127,18 +149,18 @@ import axios from "axios";
 import { onMounted } from "vue";
 
 export default defineComponent({
-  name: "SamplesManager",
+  name: "AudiosManager",
 
   components: {},
   methods: {
-    async addSample() {
+    async addAudio() {
       let data = new FormData();
-      data.append("content", this.contentAdd);
+      data.append("name", this.nameAdd);
       data.append("audio", this.file);
       let config = {
         method: "post",
         maxBodyLength: Infinity,
-        url: `${this.ip}/addsample`,
+        url: `${this.ip}/addaudio`,
         headers: {
           ...(data.getHeaders
             ? data.getHeaders()
@@ -157,13 +179,13 @@ export default defineComponent({
           console.log(error);
         });
     },
-    deleteSample(id) {
+    deleteAudio(id) {
       let data = new FormData();
       data.append("id", id);
       let config = {
         method: "post",
         maxBodyLength: Infinity,
-        url: `${this.ip}/deletesample`,
+        url: `${this.ip}/deleteaudio`,
         headers: {
           ...(data.getHeaders
             ? data.getHeaders()
@@ -183,16 +205,16 @@ export default defineComponent({
         });
     },
 
-    editSample(id, name) {
-      if (this.nameEdit != name) {
+    editAudio(id, name) {
+      if (this.nameEdit != name || this.fileEdit != null) {
         let data = new FormData();
         data.append("id", id);
-
         data.append("name", this.nameEdit);
+        data.append("audio", this.fileEdit);
         let config = {
           method: "post",
           maxBodyLength: Infinity,
-          url: `${this.ip}/editsample`,
+          url: `${this.ip}/editaudio`,
           headers: {
             ...(data.getHeaders
               ? data.getHeaders()
@@ -238,11 +260,12 @@ export default defineComponent({
   data() {
     return {
       file: null,
+      fileEdit: null,
       addDialog: false,
       editDialog: false,
       nameAdd: "",
       nameEdit: "",
-      contentAdd: "",
+      audioEdit: null,
       samples: [],
       currentPage: 1,
       itemPerPage: 5,
@@ -251,9 +274,4 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="sass">
-.rm-pad
-    .q-item__section--side
-        padding-right: 0px
-        padding-left: 0px
-</style>
+<style lang="sass"></style>
