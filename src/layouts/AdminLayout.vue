@@ -158,7 +158,7 @@ export default defineComponent({
       currentPageAudio: 1,
       currentPageSample: 1,
       ip: "http://localhost:80",
-      tab: "sample",
+      tab: "transcript",
     };
   },
 });

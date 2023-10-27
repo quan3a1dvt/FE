@@ -414,7 +414,7 @@ def fetch_samples(start_idx: int, count: int):
 
 
 @app.get("/audio/{id}")
-def download_audio(id: int):
+async def download_audio(id: int):
     cursor = conn.cursor()
     query = "SELECT * FROM audio WHERE id = %s"
     cursor.execute(query, (id, ))
