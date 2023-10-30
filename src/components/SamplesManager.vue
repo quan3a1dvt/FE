@@ -23,7 +23,7 @@
             <q-btn
               label="Find"
               color="teal"
-              @click="getTranscriptByName(transcriptNameEdit)"
+              @click="getTranscriptByName(transcriptNameAdd)"
             >
             </q-btn>
           </div>
