@@ -100,7 +100,7 @@
           </q-item-section>
           <q-separator vertical />
           <q-item-section style="width: 100%; align-items: center" class="text-black">
-            {{ sample.content }}
+            {{ transcripts[sample.transcriptId].content }}
           </q-item-section>
           <q-separator vertical />
           <q-item-section side style="width: 320px" class="">
@@ -143,8 +143,8 @@
       @before-show="
         searchTranscript = null;
         searchAudio = null;
-        transcriptNameEdit = sampleEdit.transcriptName;
-        audioNameEdit = sampleEdit.audioName;
+        transcriptNameEdit = transcripts[sampleEdit.transcriptId].transcriptName;
+        audioNameEdit = audios[sampleEdit.audioId].audioName;
       "
     >
       <q-card style="min-width: 350px">
@@ -331,7 +331,6 @@ export default defineComponent({
       };
 
       var res = await axios.request(config);
-      console.log(res["data"]);
       return res["data"];
     },
     async fetchAudio(id) {
