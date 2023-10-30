@@ -41,7 +41,7 @@
               v-model="audioNameAdd"
             />
             <q-space />
-            <q-btn label="Find" color="teal" @click="getAudioByName(audioNameEdit)">
+            <q-btn label="Find" color="teal" @click="getAudioByName(audioNameAdd)">
             </q-btn>
           </div>
           <div v-if="searchAudio != null" class="q-pt-sm">
