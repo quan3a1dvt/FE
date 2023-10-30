@@ -330,7 +330,7 @@ export default defineComponent({
         headers: {},
       };
 
-      res = await axios.request(config);
+      var res = await axios.request(config);
       console.log(res["data"]);
       return res["data"];
     },
@@ -341,7 +341,7 @@ export default defineComponent({
         url: `${this.ip}/audio?id=${id}`,
         headers: {},
       };
-      res = await axios.request(config);
+      var res = await axios.request(config);
       return res["data"];
     },
     fetchData() {
