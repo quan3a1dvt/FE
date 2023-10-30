@@ -46,7 +46,7 @@
           </div>
           <div v-if="searchAudio != null" class="q-pt-sm">
             <audio controls>
-              <source :src="`${ip}/audio/${searchAudio.id}`" type="audio/wav" />
+              <source :src="`${ip}/audiourl/${searchAudio.id}`" type="audio/wav" />
             </audio>
           </div>
         </q-card-section>
@@ -106,7 +106,7 @@
           <q-item-section side style="width: 320px" class="">
             <div class="q-pl-sm q-pt-sm">
               <audio controls>
-                <source :src="`${ip}/audio/${sample.audioId}`" type="audio/wav" />
+                <source :src="`${ip}/audiourl/${sample.audioId}`" type="audio/wav" />
               </audio>
             </div>
           </q-item-section>
@@ -184,7 +184,7 @@
           </div>
           <div v-if="searchAudio != null" class="q-pt-sm">
             <audio controls>
-              <source :src="`${ip}/audio/${searchAudio.id}`" type="audio/wav" />
+              <source :src="`${ip}/audiourl/${searchAudio.id}`" type="audio/wav" />
             </audio>
           </div>
         </q-card-section>
@@ -372,7 +372,7 @@ export default defineComponent({
         .request(config)
         .then(async (response) => {
           var samples = response.data;
-          for (var sample in samples) {
+          for (var sample of samples) {
             var transcript = await this.fetchTranscript(sample.transcriptId);
             var audio = await this.fetchAudio(sample.audioId);
             this.transcripts[transcript.id] = transcript;

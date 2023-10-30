@@ -90,7 +90,7 @@
           <q-item-section style="width: 100%" class="">
             <div class="q-pl-sm q-pt-sm">
               <audio controls>
-                <source :src="`${ip}/audio/${audio.id}`" type="audio/wav" />
+                <source :src="`${ip}/audiourl/${audio.id}`" type="audio/wav" />
               </audio>
             </div>
           </q-item-section>
