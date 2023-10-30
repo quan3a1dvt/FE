@@ -330,15 +330,9 @@ export default defineComponent({
         headers: {},
       };
 
-      axios
-        .request(config)
-        .then((response) => {
-          var transcript = response.data;
-          return transcript;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      res = await axios.request(config);
+      console.log(res["data"]);
+      return res["data"];
     },
     async fetchAudio(id) {
       let config = {
@@ -347,16 +341,8 @@ export default defineComponent({
         url: `${this.ip}/audio?id=${id}`,
         headers: {},
       };
-
-      axios
-        .request(config)
-        .then((response) => {
-          var audio = response.data;
-          return audio;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      res = await axios.request(config);
+      return res["data"];
     },
     fetchData() {
       let config = {
