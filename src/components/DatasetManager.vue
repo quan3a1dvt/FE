@@ -100,7 +100,7 @@
           </q-item-section>
           <q-separator vertical />
           <q-item-section style="width: 100%; align-items: center" class="text-black">
-            {{ sample.content }}
+            {{ transcripts[sample.transcriptId].content }}
           </q-item-section>
           <q-separator vertical />
           <q-item-section side style="width: 320px" class="">
@@ -143,8 +143,8 @@
       @before-show="
         searchTranscript = null;
         searchAudio = null;
-        transcriptNameEdit = sampleEdit.transcriptName;
-        audioNameEdit = sampleEdit.audioName;
+        transcriptNameEdit = transcripts[sampleEdit.transcriptID].transcriptName;
+        audioNameEdit = audios[sampleEdit.audioId].audioName;
       "
     >
       <q-card style="min-width: 350px">
@@ -322,42 +322,7 @@ export default defineComponent({
           console.log(error);
         });
     },
-    async fetchTranscript(id) {
-      let config = {
-        method: "get",
-        maxBodyLength: Infinity,
-        url: `${this.ip}/transcript?id=${id}`,
-        headers: {},
-      };
 
-      axios
-        .request(config)
-        .then((response) => {
-          var transcript = response.data;
-          return transcript;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-    async fetchAudio(id) {
-      let config = {
-        method: "get",
-        maxBodyLength: Infinity,
-        url: `${this.ip}/audio?id=${id}`,
-        headers: {},
-      };
-
-      axios
-        .request(config)
-        .then((response) => {
-          var audio = response.data;
-          return audio;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
     fetchData() {
       let config = {
         method: "get",
@@ -370,14 +335,7 @@ export default defineComponent({
 
       axios
         .request(config)
-        .then(async (response) => {
-          var samples = response.data;
-          for (var sample in samples) {
-            var transcript = await this.fetchTranscript(sample.transcriptId);
-            var audio = await this.fetchAudio(sample.audioId);
-            this.transcripts[transcript.id] = transcript;
-            this.audios[audio.id] = audio;
-          }
+        .then((response) => {
           this.samples = response.data;
         })
         .catch((error) => {
@@ -403,8 +361,6 @@ export default defineComponent({
       searchTranscript: null,
       searchAudio: null,
       samples: [],
-      transcripts: {},
-      audios: {},
       currentPage: 1,
       itemPerPage: 5,
       ip: this.$ip,

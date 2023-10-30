@@ -318,7 +318,7 @@ export default defineComponent({
       transcripts: [],
       currentPage: 1,
       itemPerPage: 5,
-      ip: "http://localhost:80",
+      ip: this.$ip,
       tab: "transcript",
     };
   },
