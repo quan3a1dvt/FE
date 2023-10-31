@@ -175,7 +175,7 @@
           "
           class="q-pa-sm"
         >
-          {{ transcript.update.split(".")[0] }}
+          {{ transcript.lastupdate.split(".")[0] }}
         </div>
         <div
           style="

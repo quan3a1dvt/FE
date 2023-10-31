@@ -166,7 +166,7 @@
             "
             class="q-pa-sm"
           >
-            {{ audio.date.split(".")[0] }}
+            {{ audio.lastupdate.split(".")[0] }}
           </div>
 
           <div
