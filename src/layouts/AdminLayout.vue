@@ -17,6 +17,7 @@
             <q-tab name="transcript" label="Transcript" />
             <q-tab name="audio" label="Audio" />
             <q-tab name="sample" label="Sample" />
+            <q-tab name="dataset" label="Dataset" />
             <q-tab name="model" label="Model" />
           </q-tabs>
           <q-separator />
@@ -30,6 +31,12 @@
             <q-tab-panel name="sample">
               <SamplesManager />
             </q-tab-panel>
+            <q-tab-panel name="dataset">
+              <DatasetsManager />
+            </q-tab-panel>
+            <q-tab-panel name="model">
+              <ModelsManager />
+            </q-tab-panel>
           </q-tab-panels>
         </q-card>
       </q-page>
@@ -41,6 +48,8 @@
 import SamplesManager from "../components/SamplesManager.vue";
 import TranscriptsManager from "../components/TranscriptsManager.vue";
 import AudiosManager from "../components/AudiosManager.vue";
+import DatasetsManager from "src/components/DatasetsManager.vue";
+import ModelsManager from "src/components/ModelsManager.vue";
 import { defineComponent, ref } from "vue";
 import axios from "axios";
 import { onMounted } from "vue";
@@ -56,107 +65,13 @@ export default defineComponent({
     SamplesManager,
     TranscriptsManager,
     AudiosManager,
+    DatasetsManager,
+    ModelsManager,
   },
-  methods: {
-    async AddSample() {
-      console.log(this.contentAdd);
-      console.log(this.file);
-      let data = new FormData();
-      data.append("content", this.contentAdd);
-      data.append("audio", this.file);
-
-      let config = {
-        method: "post",
-        maxBodyLength: Infinity,
-        url: `${this.ip}/addsample`,
-        headers: {
-          ...(data.getHeaders
-            ? data.getHeaders()
-            : { "Content-Type": "multipart/form-data" }),
-        },
-        data: data,
-      };
-
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-    deleteSample(id) {
-      let config = {
-        method: "post",
-        maxBodyLength: Infinity,
-        url: `${this.ip}/deletesample?id=${id}`,
-        headers: {},
-      };
-
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-
-    editTranscript(id, content) {
-      if (this.contentEdit != content) {
-        let config = {
-          method: "post",
-          maxBodyLength: Infinity,
-          url: `${this.ip}/edittranscript?id=${id}&content=${this.contentEdit}`,
-          headers: {},
-        };
-
-        axios
-          .request(config)
-          .then((response) => {
-            console.log(JSON.stringify(response.data));
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-    },
-    fetchData() {
-      let config = {
-        method: "get",
-        maxBodyLength: Infinity,
-        url: `${this.ip}/samples?start_idx=${
-          (this.currentPageSample - 1) * 5
-        }&count=${5}`,
-        headers: {},
-      };
-
-      axios
-        .request(config)
-        .then((response) => {
-          this.samples = response.data;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-  },
+  methods: {},
 
   data() {
     return {
-      file: null,
-      addDialog: false,
-      editDialog: false,
-      contentAdd: "",
-      contentEdit: "",
-      transcripts: [],
-      audios: [],
-      samples: [],
-      currentPageTranscript: 1,
-      currentPageAudio: 1,
-      currentPageSample: 1,
       ip: "http://localhost:80",
       tab: "transcript",
     };
