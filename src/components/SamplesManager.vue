@@ -11,6 +11,9 @@
     <q-dialog v-model="addDialog" @before-show="file = null">
       <q-card style="min-width: 350px">
         <q-card-section class="q-pt-none">
+          <q-input type="text" dense v-model="nameAdd" />
+        </q-card-section>
+        <q-card-section class="q-pt-none">
           <div class="flex q-pt-md">
             <q-input
               style="width: 240px"
@@ -52,79 +55,146 @@
         </q-card-section>
         <q-card-actions align="right" class="text-primary">
           <q-btn label="Cancel" v-close-popup />
-          <q-btn label="Add Sample" color="teal" v-close-popup @click="addSample" />
+          <q-btn label="Add Sample" color="teal" v-close-popup @click="addSample()" />
         </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
   <div>
-    <q-list bordered class="rounded-borders">
-      <q-item class="q-pa-none q-pr-sm">
-        <q-item-section side style="width: 50px; align-items: center" class="text-black">
+    <div style="border: solid rgb(192, 192, 192); border-width: 0px 0px 1px 0px">
+      <div class="flex">
+        <div
+          style="
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: solid rgb(192, 192, 192);
+            border-width: 1px 0px 0px 1px;
+          "
+        >
           STT
-        </q-item-section>
-        <q-separator vertical />
-        <q-item-section style="width: 100%; align-items: center" class="text-black">
+        </div>
+        <div
+          style="
+            width: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: solid rgb(192, 192, 192);
+            border-width: 1px 0px 0px 1px;
+          "
+        >
+          Name
+        </div>
+        <div
+          style="
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: solid rgb(192, 192, 192);
+            border-width: 1px 0px 0px 1px;
+          "
+        >
           Content
-        </q-item-section>
-        <q-separator vertical />
-        <q-item-section side style="width: 320px; align-items: center" class="">
+        </div>
+        <div
+          style="
+            width: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: solid rgb(192, 192, 192);
+            border-width: 1px 0px 0px 1px;
+          "
+        >
           Audio
-        </q-item-section>
-        <q-separator vertical />
-        <q-item-section side>
-          <q-btn
-            class="q-ml-sm"
-            style="visibility: hidden; width: fit-content"
-            label="Edit"
-          >
-          </q-btn>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn
-            class="q-ml-sm"
-            style="visibility: hidden; width: fit-content"
-            label="Delete"
-          ></q-btn>
-        </q-item-section>
-      </q-item>
+        </div>
+        <div
+          style="
+            width: 160px;
+            border: solid rgb(192, 192, 192);
+            border-width: 1px 1px 0px 1px;
+          "
+        ></div>
+      </div>
       <q-separator />
       <div v-for="(sample, index) in samples" :key="sample.id">
-        <q-item class="q-pa-none q-pr-sm">
-          <q-item-section
-            side
-            style="width: 50px; align-items: center"
-            class="text-black"
+        <div class="flex">
+          <div
+            style="
+              width: 50px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: solid rgb(192, 192, 192);
+              border-width: 1px 0px 0px 1px;
+            "
           >
-            {{ index }}
-          </q-item-section>
-          <q-separator vertical />
-          <q-item-section style="width: 100%; align-items: center" class="text-black">
+            {{ index + (this.currentPage - 1) * this.itemPerPage }}
+          </div>
+          <div
+            style="
+              width: 100px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: solid rgb(192, 192, 192);
+              border-width: 1px 0px 0px 1px;
+            "
+          >
+            {{ sample.name }}
+          </div>
+          <div
+            style="
+              width: 150px;
+              flex-grow: 1;
+              display: flex;
+              align-items: center;
+              word-break: break-all;
+              border: solid rgb(192, 192, 192);
+              border-width: 1px 0px 0px 1px;
+            "
+            class="q-pa-sm"
+          >
             {{ transcripts[sample.transcriptId].content }}
-          </q-item-section>
-          <q-separator vertical />
-          <q-item-section side style="width: 320px" class="">
-            <div class="q-pl-sm q-pt-sm">
-              <audio controls>
-                <source :src="`${ip}/audiourl/${sample.audioId}`" type="audio/wav" />
-              </audio>
-            </div>
-          </q-item-section>
-          <q-separator vertical />
-          <q-item-section side>
+          </div>
+          <div
+            style="
+              width: 300px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: solid rgb(192, 192, 192);
+              border-width: 1px 0px 0px 1px;
+            "
+          >
+            <audio controls>
+              <source :src="`${ip}/audiourl/${sample.audioId}`" type="audio/wav" />
+            </audio>
+          </div>
+          <div
+            style="
+              width: 160px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: solid rgb(192, 192, 192);
+              border-width: 1px 1px 0px 1px;
+            "
+            class="q-pa-sm"
+          >
             <q-btn
-              class="q-ml-sm"
               style="width: fit-content"
               label="Edit"
               color="blue"
               @click="
-                sampleEdit = sample;
+                sampleEdit = JSON.parse(JSON.stringify(sample));
                 editDialog = true;
               "
             >
             </q-btn>
-          </q-item-section>
-          <q-item-section side class="">
             <q-btn
               class="q-ml-sm"
               style="width: fit-content"
@@ -132,22 +202,15 @@
               color="red"
               @click="deleteSample(sample.id)"
             ></q-btn>
-          </q-item-section>
-        </q-item>
-
-        <q-separator spaced />
+          </div>
+        </div>
       </div>
-    </q-list>
-    <q-dialog
-      v-model="editDialog"
-      @before-show="
-        searchTranscript = null;
-        searchAudio = null;
-        transcriptNameEdit = transcripts[sampleEdit.transcriptId].transcriptName;
-        audioNameEdit = audios[sampleEdit.audioId].audioName;
-      "
-    >
+    </div>
+    <q-dialog v-model="editDialog" @before-show="editSetup()">
       <q-card style="min-width: 350px">
+        <q-card-section class="q-pt-none">
+          <q-input type="text" dense v-model="nameEdit" />
+        </q-card-section>
         <q-card-section class="q-pt-none">
           <div class="flex q-pt-md">
             <q-input
@@ -190,12 +253,7 @@
         </q-card-section>
         <q-card-actions align="right" class="text-primary">
           <q-btn label="Cancel" v-close-popup />
-          <q-btn
-            label="Accept"
-            color="teal"
-            v-close-popup
-            @click="editSample(sampleEdit.id, searchAudio.id, searchTranscript.id)"
-          />
+          <q-btn label="Accept" color="teal" v-close-popup @click="editSample()" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -247,6 +305,7 @@ export default defineComponent({
     },
     async addSample() {
       let data = new FormData();
+      data.append("name", this.nameAdd);
       data.append("audioId", this.searchAudio.id);
       data.append("transcriptId", this.searchTranscript.id);
       let config = {
@@ -294,12 +353,21 @@ export default defineComponent({
           console.log(error);
         });
     },
-
-    editSample(id, audioId, transcriptId) {
+    editSetup() {
+      this.nameEdit = this.sampleEdit.name;
+      this.transcriptNameEdit = this.transcripts[this.sampleEdit.transcriptId].name;
+      this.audioNameEdit = this.audios[this.sampleEdit.audioId].name;
+      this.searchTranscript = JSON.parse(
+        JSON.stringify(this.transcripts[this.sampleEdit.transcriptId])
+      );
+      this.searchAudio = JSON.parse(JSON.stringify(this.audios[this.sampleEdit.audioId]));
+    },
+    editSample() {
       let data = new FormData();
-      data.append("id", id);
-      data.append("audioId", audioId);
-      data.append("transcriptId", transcriptId);
+      data.append("id", this.sampleEdit.id);
+      data.append("name", this.nameEdit);
+      data.append("audioId", this.searchAudio.id);
+      data.append("transcriptId", this.searchTranscript.id);
       let config = {
         method: "post",
         maxBodyLength: Infinity,
@@ -375,12 +443,11 @@ export default defineComponent({
   },
   data() {
     return {
-      file: null,
-      fileEdit: null,
       addDialog: false,
       editDialog: false,
+      nameAdd: "",
+      nameEdit: "",
       sampleEdit: "",
-
       transcriptNameAdd: "",
       audioNameAdd: "",
       transcriptNameEdit: "",
