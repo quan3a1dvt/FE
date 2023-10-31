@@ -190,7 +190,7 @@
               style="width: fit-content"
               label="Delete"
               color="red"
-              @click="deleteSample(sample.id)"
+              @click="deleteSampleFromDataset(sample.id)"
             ></q-btn>
           </div>
         </div>
@@ -249,7 +249,7 @@ export default defineComponent({
       axios
         .request(config)
         .then((response) => {
-          this.fetchData();
+          this.fetchSamples();
         })
         .catch((error) => {
           console.log(error);
@@ -274,7 +274,7 @@ export default defineComponent({
       axios
         .request(config)
         .then((response) => {
-          this.fetchData();
+          this.fetchSamples();
         })
         .catch((error) => {
           console.log(error);
