@@ -8,7 +8,7 @@
     />
     <q-space></q-space>
     <q-btn label="Add" color="teal" @click="addDialog = true"></q-btn>
-    <q-dialog v-model="addDialog">
+    <q-dialog v-model="addDialog" @before-show="resetAdđDialog()">
       <q-card style="min-width: 350px">
         <q-card-section class="q-pt-none">
           <q-input type="text" dense v-model="nameAdd" />
@@ -410,6 +410,13 @@ export default defineComponent({
       };
       var res = await axios.request(config);
       return res["data"];
+    },
+    resetAdđDialog() {
+      this.nameAdd = "";
+      this.transcriptNameAdd = "";
+      this.audioNameAdd = "";
+      this.searchAudio = null;
+      this.searchTranscript = null;
     },
     fetchData() {
       let config = {

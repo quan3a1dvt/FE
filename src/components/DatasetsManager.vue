@@ -24,8 +24,37 @@
         }
       "
     />
-    <q-btn label="Add" color="teal" @click="addDialog = true"></q-btn>
-    <q-dialog v-model="addDialog">
+    <q-btn
+      label="Add Dataset"
+      class="q-ml-sm"
+      color="teal"
+      @click="addDatasetDialog = true"
+    ></q-btn>
+    <q-dialog v-model="addDatasetDialog" @before-show="datasetName = ''">
+      <q-card style="min-width: 350px">
+        <q-card-section class="q-pt-none">
+          <q-input
+            style="width: 240px"
+            label="Enter dataset name"
+            type="text"
+            dense
+            v-model="datasetName"
+          />
+        </q-card-section>
+        <q-card-actions align="right" class="text-primary">
+          <q-btn label="Cancel" v-close-popup />
+          <q-btn label="Add Dataset" color="teal" v-close-popup @click="addDataset()" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-btn
+      v-if="datasetId != null"
+      label="Add Sample"
+      class="q-ml-sm"
+      color="teal"
+      @click="addSampleDialog = true"
+    ></q-btn>
+    <q-dialog v-model="addSampleDialog" @before-show="sampleName = ''">
       <q-card style="min-width: 350px">
         <q-card-section class="q-pt-none">
           <div class="flex q-pt-md">
@@ -208,6 +237,30 @@ export default defineComponent({
   name: "DatasetsManager",
   components: {},
   methods: {
+    addDataset() {
+      let data = new FormData();
+      data.append("name", this.datasetName);
+      let config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: `${this.ip}/adddataset`,
+        headers: {
+          ...(data.getHeaders
+            ? data.getHeaders()
+            : { "Content-Type": "multipart/form-data" }),
+        },
+        data: data,
+      };
+
+      axios
+        .request(config)
+        .then((response) => {
+          this.fetchData();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
     async getSampleByName() {
       let config = {
         method: "get",
@@ -357,7 +410,9 @@ export default defineComponent({
   },
   data() {
     return {
-      addDialog: false,
+      addDatasetDialog: false,
+      addSampleDialog: false,
+      datasetName: "",
       editDialog: false,
       searchSample: null,
       sampleName: "",

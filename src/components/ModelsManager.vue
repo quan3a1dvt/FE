@@ -1,6 +1,7 @@
 <template>
   <div>
     <q-select
+      style="width: 200px"
       filled
       stack-label
       dense
@@ -9,8 +10,10 @@
       label="Text to Mels"
       emit-value
       map-options
+      class="q-mb-sm"
     />
     <q-select
+      style="width: 200px"
       filled
       stack-label
       dense
@@ -19,6 +22,7 @@
       label="Vocoder"
       emit-value
       map-options
+      class="q-mb-sm"
     />
     <q-btn label="Select" color="teal" @click="SelectModel()"></q-btn>
   </div>
@@ -34,6 +38,8 @@ export default defineComponent({
   methods: {
     SelectModel() {
       let data = new FormData();
+      console.log(this.ttmId);
+      console.log(this.vocoderId);
       data.append("ttmId", this.ttmId);
       data.append("vocoderId", this.vocoderId);
       let config = {
@@ -105,7 +111,8 @@ export default defineComponent({
     },
   },
   beforeMount() {
-    // this.fetchData();
+    this.fetchTtm();
+    this.fetchVocoder();
   },
   data() {
     return {
